@@ -1,0 +1,10 @@
+{
+  "lottery_project_file/lottery.sol": {
+    "__sources__": {
+      "lottery_project_file/lottery.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8.0 <0.9.0;\n\ncontract Lottery{\n    address public manager;\n    address payable[] public participants;\n    \n    constructor() {\n        manager=msg.sender; //global variable\n    }\n\n    receive() external payable { \n        require(msg.value == 2 ether, \"Send exactly 2 ETH\");\n        participants.push(payable(msg.sender));\n    }\n    function getBalance() public view returns(uint){\n        require(msg.sender == manager, \"Only manager\");\n        return address(this).balance;\n    }\n    function random() public view returns(uint){\n        return uint(keccak256(abi.encodePacked(block.prevrandao,block.timestamp,participants.length)));\n    }\n  function selectWinner() public returns (address) {\n    require(msg.sender == manager, \"Only manager\");\n    require(participants.length >= 3, \"Need at least 3 players\");\n    uint r = random();\n    address payable winner;\n    uint index = r % participants.length;\n    winner = participants[index];\n\n    uint prize = getBalance() / 2;   // half of the total money\n\n    (bool success, ) = winner.call{value: prize}(\"\");\n    require(success, \"Transfer failed\");\n\n    participants = new address payable[](0);\n    return winner;\n    }\n}",
+        "file": "lottery_project_file/lottery.sol"
+      }
+    }
+  }
+}
